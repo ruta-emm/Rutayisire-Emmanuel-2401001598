@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hover Button</title>
+    <style>
+        .button{
+            background: rgb(9, 62, 9);
+            padding: 20px 40px;
+            font-size: 20px;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            margin: 150px;
+            cursor: pointer;
+        }
+        .button:hover{
+            background-color: crimson;
+
+        }
+        #para{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="button" onclick="Clicked()">Click Me -></button>
+    <p id="para" style="font-size: 40px; padding-left: 50px;">You clicked on this buttom</p>
+    <script>
+        let Clicked = () => {
+            // alert('Someone clicks on button')
+            let paragraph = document.getElementById("para");  // No '#' needed
+            paragraph.style.display = 'block';  // To set the display to 'block'
+
+        }
+    </script>
+</body>
+</html>
