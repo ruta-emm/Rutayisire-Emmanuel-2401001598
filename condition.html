@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>conditon</title>
+</head>
+<body>
+    <h1>Hello!</h1>
+    <button onclick="hello()">Click Me</button>
+    <script>
+
+        const hello = () => {
+            let userInput = prompt('Enter first 4 character of your name: ')
+            let word = document.querySelector('h1')
+            if (userInput == 'Ruta' || userInput == 'ruta'){
+                word.innerHTML = "You've CAT tomorrow and Your Fullname is Emmanuel RUTAYISIRE";
+            }else{
+                word.innerHTML = 'Okay!'
+            }
+        }
+    </script>
+</body>
+</html>

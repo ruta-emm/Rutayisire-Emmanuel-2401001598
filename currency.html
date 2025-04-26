@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+        }
+
+        .converter-container {
+            width: 400px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        #result {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 15px;
+            background-color: #e0f7fa;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 60%;
+        }
+
+        select {
+            width: 35%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .conversion-history {
+            margin-top: 30px;
+        }
+
+        .history-card {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Style for the Reset Button */
+        .reset-btn {
+            padding: 10px 15px;
+            background-color: #f44336;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="converter-container">
+        <!-- Display the conversion result here -->
+        <div id="result">Please enter an amount and select a currency to convert.</div>
+
+        <!-- Selectors for amount input and currency -->
+        <div class="form-group">
+            <input type="number" id="amountInput" placeholder="Enter amount in USD" />
+            <select id="currencySelect">
+                <option value="">Select Currency</option>
+                <!-- Currency options will be populated here -->
+            </select>
+        </div>
+
+        <!-- Display conversion history -->
+        <div class="conversion-history">
+            <h3>Conversion History</h3>
+            <div id="historyContainer"></div>
+        </div>
+
+        <!-- Reset Button to clear history -->
+        <button class="reset-btn" id="resetButton">Reset History</button>
+    </div>
+
+    <script>
+        // Fetch exchange rates and populate the select dropdown
+        async function fetchExchangeRates() {
+            try {
+                const api = 'https://api.exchangerate-api.com/v4/latest/USD';
+                const response = await fetch(api);
+                const data = await response.json();
+
+                const currencySelect = document.getElementById('currencySelect');
+                for (const currency in data.rates) {
+                    const option = document.createElement('option');
+                    option.value = currency;
+                    option.textContent = currency;
+                    currencySelect.appendChild(option);
+                }
+
+                // Trigger conversion when either the amount or currency is changed
+                currencySelect.addEventListener('change', updateConversion);
+                document.getElementById('amountInput').addEventListener('input', updateConversion);
+
+                // Load history from localStorage
+                loadConversionHistory();
+            } catch (error) {
+                console.error('Error fetching exchange rates:', error);
+                alert('Could not fetch exchange rates.');
+            }
+        }
+
+        // Update the conversion result
+        function updateConversion() {
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const selectedCurrency = document.getElementById('currencySelect').value;
+
+            // Validate the input
+            if (!amount || !selectedCurrency) {
+                document.getElementById('result').textContent = 'Please enter a valid amount and select a currency.';
+                return;
+            }
+
+            fetch('https://api.exchangerate-api.com/v4/latest/USD')
+                .then(response => response.json())
+                .then(data => {
+                    const rate = data.rates[selectedCurrency];
+                    const convertedAmount = amount * rate;
+
+                    // Display the result
+                    const resultText = `${amount} USD is ${convertedAmount.toFixed(2)} ${selectedCurrency}`;
+                    document.getElementById('result').textContent = resultText;
+
+                    // Save conversion history in LocalStorage
+                    saveToHistory(amount, selectedCurrency, convertedAmount);
+                })
+                .catch(error => {
+                    console.error('Error during conversion:', error);
+                    document.getElementById('result').textContent = 'Error fetching conversion rate.';
+                });
+        }
+
+        // Save conversion to history in LocalStorage
+        function saveToHistory(amount, currency, convertedAmount) {
+            const history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
+
+            // Add new conversion to the history
+            history.push({ amount, currency, convertedAmount });
+
+            // Limit history to the last 5 conversions
+            if (history.length > 5) {
+                history.shift(); // Remove the oldest conversion if there are more than 5
+            }
+
+            // Save to localStorage
+            localStorage.setItem('conversionHistory', JSON.stringify(history));
+
+            // Load history after saving
+            loadConversionHistory();
+        }
+
+        // Load conversion history from LocalStorage
+        function loadConversionHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            const history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
+
+            // Clear history container before adding new entries
+            historyContainer.innerHTML = '';
+
+            // Add each history item to the history container
+            history.forEach(entry => {
+                const historyCard = document.createElement('div');
+                historyCard.classList.add('history-card');
+                historyCard.textContent = `${entry.amount} USD = ${entry.convertedAmount.toFixed(2)} ${entry.currency}`;
+                historyContainer.appendChild(historyCard);
+            });
+        }
+
+        // Reset button functionality to clear localStorage and conversion history
+        document.getElementById('resetButton').addEventListener('click', function() {
+            // Clear LocalStorage
+            localStorage.removeItem('conversionHistory');
+
+            // Clear history container and result
+            document.getElementById('historyContainer').innerHTML = '';
+            document.getElementById('result').textContent = 'Please enter an amount and select a currency to convert.';
+
+            alert("Conversion history has been reset.");
+        });
+
+        // Call the function to populate the currency dropdown when the page loads
+        fetchExchangeRates();
+    </script>
+
+</body>
+
+</html>

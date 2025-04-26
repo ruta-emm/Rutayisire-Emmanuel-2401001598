@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Selector</title>
+    <style>
+        button{
+            padding: 10px 20px;
+            background-color: rgb(47, 99, 211);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        button:hover{
+            border: 2px solid rgb(47, 99, 211);
+            color: rgb(47, 99, 211);
+            background-color: #fff;
+            padding: 8.5px 18.5px;
+        }
+    </style>
+</head>
+<body>
+    
+    <button onClick="studentPortalEntry()">
+        Click Here
+    </button>
+    <h1>
+        Evening session
+    </h1>
+    <script>
+        const studentPortalEntry = () => {
+            document.querySelector('h1').innerHTML = "I'm student at UOK";
+        }
+    </script>
+</body>
+</html>
